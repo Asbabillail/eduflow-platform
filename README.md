@@ -159,3 +159,5 @@ supabase/migrations/          Database SQL files
 ---
 
 *Internal documentation only. Not for external distribution.*
+
+<!-- deploy trigger -->
