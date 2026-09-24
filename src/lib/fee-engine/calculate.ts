@@ -121,7 +121,7 @@ export function calculateQuotation(
   let grandTotal = 0
   const approvalReasons: string[] = []
 
-  for (const [index, student] of students.entries()) {
+  for (let index = 0; index < students.length; index++) { const student = students[index];
     const result = calculateStudent(student, index, approvalThresholds, approvalReasons)
     studentResults.push(result)
     subtotal += result.baseTuition
