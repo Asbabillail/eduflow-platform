@@ -24,7 +24,7 @@ export async function GET(request: Request) {
           .single()
 
         if (tenantUser?.tenants) {
-          const tenant = tenantUser.tenants as { slug: string }
+          const tenant = (Array.isArray(tenantUser.tenants) ? tenantUser.tenants[0] : tenantUser.tenants) as { slug: string }
           return NextResponse.redirect(`${origin}/${tenant.slug}/dashboard`)
         }
 

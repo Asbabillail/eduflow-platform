@@ -41,7 +41,7 @@ export async function middleware(request: NextRequest) {
       .single()
 
     if (tenantUser?.tenants) {
-      const tenant = tenantUser.tenants as { slug: string }
+      const tenant = (Array.isArray(tenantUser.tenants) ? tenantUser.tenants[0] : tenantUser.tenants) as { slug: string }
       const url = request.nextUrl.clone()
       url.pathname = `/${tenant.slug}/dashboard`
       return NextResponse.redirect(url)
