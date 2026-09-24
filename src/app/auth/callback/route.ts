@@ -3,26 +3,43 @@ import { NextResponse } from 'next/server'
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
-  const code = searchParams.get('code')
   const token_hash = searchParams.get('token_hash')
   const type = searchParams.get('type')
 
-  const supabase = await createClient()
-
   if (token_hash && type) {
-    const { error } = await supabase.auth.verifyOtp({ token_hash, type: type as any })
+    const supabase = await createClient()
+    const { error } = await supabase.auth.verifyOtp({
+      token_hash,
+      type: type as any,
+    })
+
     if (!error) {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (session) {
-        const payload = JSON.parse(Buffer.from(session.access_token.split('.')[1], 'base64').toString())
-        if (payload.user_role === 'super_admin') return NextResponse.redirect(`${origin}/platform`)
-        if (payload.tenant_id) {
-          const { data: tenant } = await supabase.from('tenants').select('slug').eq('id', payload.tenant_id).single()
-          if (tenant) return NextResponse.redirect(`${origin}/${tenant.slug}/dashboard`)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data: tenantUser } = await supabase
+          .from('tenant_users')
+          .select('role, tenants(slug)')
+          .eq('auth_user_id', user.id)
+          .eq('is_active', true)
+          .single()
+
+        if (tenantUser?.tenants) {
+          const tenant = tenantUser.tenants as { slug: string }
+          return NextResponse.redirect(`${origin}/${tenant.slug}/dashboard`)
+        }
+
+        const { data: superAdmin } = await supabase
+          .from('super_admins')
+          .select('id')
+          .eq('auth_user_id', user.id)
+          .single()
+
+        if (superAdmin) {
+          return NextResponse.redirect(`${origin}/platform`)
         }
       }
     }
   }
 
-  return NextResponse.redirect(`${origin}/login`)
+  return NextResponse.redirect(`${origin}/login?error=auth_failed`)
 }
