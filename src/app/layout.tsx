@@ -1,12 +1,12 @@
-import type { Metadata } from 'next'
+ï»¿import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
 export const metadata: Metadata = {
-  title: 'EduFlow — School Administration Platform',
-  description: 'Fee quotation and admission management for international schools',
+  title: 'EduFlow',
+  description: 'School Administration Platform',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
