@@ -1,21 +1,18 @@
-import { createClient } from "@/lib/supabase/server"
-import { NextResponse } from "next/server"
+import { createClient } from '@/lib/supabase/server'
+import { NextResponse } from 'next/server'
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
-  const token_hash = searchParams.get("token_hash")
-  const type = searchParams.get("type")
+  const code = searchParams.get('code')
 
-  if (token_hash && type) {
+  if (code) {
     const supabase = await createClient()
-    const { error } = await supabase.auth.verifyOtp({
-      token_hash,
-      type: type as any,
-    })
+    const { error } = await supabase.auth.exchangeCodeForSession(code)
+
     if (!error) {
       return NextResponse.redirect(`${origin}/app`)
     }
   }
 
-  return NextResponse.redirect(`${origin}/login`)
+  return NextResponse.redirect(`${origin}/login?error=auth_callback_failed`)
 }
