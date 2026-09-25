@@ -14,16 +14,10 @@ export default function LoginPage() {
   const ar = lang === 'ar'
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const code = params.get('code')
-    if (code) {
-      supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
-        if (!error) router.push('/app')
-      })
-      return
-    }
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session) router.push('/app')
+      if (event === 'SIGNED_IN' && session) {
+        router.push('/app')
+      }
     })
     return () => subscription.unsubscribe()
   }, [])
@@ -34,7 +28,10 @@ export default function LoginPage() {
     setError('')
     const { error } = await supabase.auth.signInWithOtp({
       email: email.toLowerCase().trim(),
-      options: { shouldCreateUser: false },
+      options: {
+        shouldCreateUser: false,
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
     })
     if (error) setError(ar ? 'تعذر إرسال رابط تسجيل الدخول.' : 'Could not send sign-in link.')
     else setSent(true)
